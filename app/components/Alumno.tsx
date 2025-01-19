@@ -8,13 +8,42 @@ import {
   Pagination,
   Card,
   CardMedia,
-  CardContent
+  CardContent,
+  Checkbox,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  DialogActions
 } from "@mui/material";
 
+// Type definitions for routine and exercise
+interface Ejercicio {
+  _id: string;
+  ejercicio: string;
+  semana: string;
+  series: string;
+  repeticiones: string;
+  kilos: string;
+  descanso: string;
+  video: string | null;
+}
+
+interface Rutina {
+  nombreAlumno: string;
+  codigoAlumno: string;
+  diasRutina: number;
+  ejerciciosPorDia: number;
+  ejercicios: Ejercicio[][];
+}
+
 export default function Alumno() {
-  const [rutina, setRutina] = useState<any>(null);
+  const [rutina, setRutina] = useState<Rutina | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentDay, setCurrentDay] = useState(1);
+  const [completedExercises, setCompletedExercises] = useState<{ [key: string]: boolean }>({});
+  const [editingExercise, setEditingExercise] = useState<Ejercicio | null>(null);
 
   useEffect(() => {
     const fetchRutina = async () => {
@@ -24,6 +53,12 @@ export default function Alumno() {
 
         if (data.status === "success") {
           setRutina(data.rutina);
+          // Initialize completed exercises state
+          const initialCompletedState = data.rutina.ejercicios.flat().reduce((acc: { [key: string]: boolean }, ejercicio: Ejercicio) => {
+            acc[ejercicio._id] = false;
+            return acc;
+          }, {});
+          setCompletedExercises(initialCompletedState);
         } else {
           console.error("Error al cargar rutina");
         }
@@ -39,6 +74,66 @@ export default function Alumno() {
 
   const handleDayChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentDay(value);
+  };
+
+  const handleExerciseCompletion = (ejercicioId: string, completed: boolean) => {
+    setCompletedExercises(prev => ({
+      ...prev,
+      [ejercicioId]: completed
+    }));
+  };
+
+  const handleEditExercise = (ejercicio: Ejercicio) => {
+    setEditingExercise(ejercicio);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingExercise(null);
+  };
+
+  const handleSaveEditedExercise = async () => {
+    if (!editingExercise || !rutina) return;
+
+    try {
+      const response = await fetch("/api/rutinas/alumno", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(editingExercise)
+      });
+
+      // Log the raw response for debugging
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
+      // Parse the response as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        throw new Error('Invalid JSON response');
+      }
+
+      if (data.status === "success") {
+        // Update the routine with the edited exercise
+        const updatedRutina = { ...rutina };
+        updatedRutina.ejercicios = updatedRutina.ejercicios.map(dayExercises => 
+          dayExercises.map(ejercicio => 
+            ejercicio._id === editingExercise._id ? editingExercise : ejercicio
+          )
+        );
+        setRutina(updatedRutina);
+        handleCloseEditModal();
+      } else {
+        console.error("Error al guardar ejercicio editado:", data);
+        alert(data.message || "Error al guardar el ejercicio");
+      }
+    } catch (error) {
+      console.error("Error al guardar ejercicio:", error);
+      alert("No se pudo guardar el ejercicio. Inténtalo de nuevo.");
+    }
   };
 
   if (loading) return <Typography align="center">Cargando...</Typography>;
@@ -78,7 +173,7 @@ export default function Alumno() {
 
         <Grid item xs={12}>
           <Grid container spacing={2}>
-            {currentDayExercises.map((ejercicio: any, index: number) => (
+            {currentDayExercises.map((ejercicio, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card 
                   sx={{ 
@@ -118,6 +213,11 @@ export default function Alumno() {
                     >
                       {ejercicio.ejercicio}
                     </Typography>
+                    <Checkbox 
+                      checked={completedExercises[ejercicio._id] || false}
+                      onChange={(e) => handleExerciseCompletion(ejercicio._id, e.target.checked)}
+                      color="primary"
+                    />
                   </CardContent>
                   <CardContent>
                     <Grid container spacing={1}>
@@ -135,6 +235,18 @@ export default function Alumno() {
                       </Grid>
                     </Grid>
                   </CardContent>
+                  {!completedExercises[ejercicio._id] && (
+                    <CardContent>
+                      <Button 
+                        variant="outlined" 
+                        color="primary" 
+                        onClick={() => handleEditExercise(ejercicio)}
+                        fullWidth
+                      >
+                        Editar Ejercicio
+                      </Button>
+                    </CardContent>
+                  )}
                 </Card>
               </Grid>
             ))}
@@ -150,6 +262,74 @@ export default function Alumno() {
           />
         </Grid>
       </Grid>
+
+      {/* Edit Exercise Modal */}
+      <Dialog 
+        open={!!editingExercise} 
+        onClose={handleCloseEditModal}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Editar Ejercicio</DialogTitle>
+        <DialogContent>
+          {editingExercise && (
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Ejercicio"
+                  value={editingExercise.ejercicio}
+                  fullWidth
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Series"
+                  type="number"
+                  value={editingExercise.series}
+                  onChange={(e) => setEditingExercise({...editingExercise, series: e.target.value})}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Repeticiones"
+                  type="number"
+                  value={editingExercise.repeticiones}
+                  onChange={(e) => setEditingExercise({...editingExercise, repeticiones: e.target.value})}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Peso (kg)"
+                  type="number"
+                  value={editingExercise.kilos}
+                  onChange={(e) => setEditingExercise({...editingExercise, kilos: e.target.value})}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Descanso (seg)"
+                  type="number"
+                  value={editingExercise.descanso}
+                  onChange={(e) => setEditingExercise({...editingExercise, descanso: e.target.value})}
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEditModal} color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={handleSaveEditedExercise} color="primary">
+            Guardar Cambios
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }
