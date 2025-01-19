@@ -4,50 +4,81 @@ import React from 'react';
 import { 
   AppBar, 
   Toolbar, 
-  Typography, 
   Button, 
   Box,
   Container
 } from '@mui/material';
-import SportsGymnasticsIcon from '@mui/icons-material/SportsGymnastics';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Navbar() {
   return (
-    <AppBar position="static" color="primary">
+    <AppBar 
+      position="static" 
+      sx={{ 
+        backgroundColor: 'whitesmoke', 
+        height: '100px',
+        justifyContent: 'center'
+      }}
+    >
       <Container maxWidth="xl">
-        <Toolbar disableGutters>
+        <Toolbar 
+          disableGutters 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center' 
+          }}
+        >
           {/* Logo */}
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
-            <SportsGymnasticsIcon sx={{ mr: 1 }} />
-            <Typography
-              variant="h6"
-              noWrap
-              sx={{
-                mr: 2,
-                fontWeight: 700,
-                letterSpacing: '.1rem',
+          <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+            <Image 
+              src="/yu.png" 
+              alt="Yu-Routine Logo" 
+              width={100} 
+              height={50} 
+              style={{ 
+                objectFit: 'contain', 
+                width: 'auto', 
+                height: 'auto' 
               }}
-            >
-              Yu-Routine
-            </Typography>
+            />
           </Link>
 
-          {/* Spacer */}
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+          {/* Navigation Buttons */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Link href="/" passHref>
-              <Button color="inherit" sx={{ my: 2, mx: 1 }}>
+              <Button 
+                color="primary" 
+                sx={{ 
+                  my: 2, 
+                  mx: 1, 
+                  fontSize: '1.1em',
+                  color: '#333', 
+                  '&:hover': { 
+                    color: '#FF1493',  // Color fucsia
+                    backgroundColor: 'transparent'
+                  } 
+                }}
+              >
                 Home
               </Button>
             </Link>
-            <Link href="/alumno" passHref>
-              <Button color="inherit" sx={{ my: 2, mx: 1 }}>
-                Alumno
-              </Button>
-            </Link>
-            <Link href="/entrenador" passHref>
-              <Button color="inherit" sx={{ my: 2, mx: 1 }}>
-                Entrenador
+            <Link href="/login" passHref>
+              <Button 
+                color="primary" 
+                sx={{ 
+                  my: 2, 
+                  mx: 1, 
+                  fontSize: '1.1em',
+                  color: '#333', 
+                  '&:hover': { 
+                    color: '#FF1493',  // Color fucsia
+                    backgroundColor: 'transparent'
+                  } 
+                }}
+              >
+                Ingresar
               </Button>
             </Link>
           </Box>

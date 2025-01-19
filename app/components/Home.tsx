@@ -1,138 +1,159 @@
 "use client";
 
-import React from 'react';
-import { 
-  Container, 
-  Typography, 
-  Box, 
-  Grid, 
-  Button,
-  Paper,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText
-} from '@mui/material';
-import Link from 'next/link';
-import SportsGymnasticsIcon from '@mui/icons-material/SportsGymnastics';
-import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import TrackChangesIcon from '@mui/icons-material/TrackChanges';
-import Navbar from './Navbar';
+import React from "react";
+import { Container, Typography, Box, Grid, Button, useTheme } from "@mui/material";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
-  const features = [
-    {
-      icon: <SportsGymnasticsIcon color="primary" />,
-      title: 'Rutinas Personalizadas',
-      description: 'Crea rutinas adaptadas a las necesidades de cada alumno.'
-    },
-    {
-      icon: <DirectionsRunIcon color="primary" />,
-      title: 'Seguimiento de Progreso',
-      description: 'Monitorea el avance y evolución de tus alumnos.'
-    },
-    {
-      icon: <ScheduleIcon color="primary" />,
-      title: 'Gestión de Horarios',
-      description: 'Organiza y programa entrenamientos de manera eficiente.'
-    },
-    {
-      icon: <TrackChangesIcon color="primary" />,
-      title: 'Objetivos Claros',
-      description: 'Define y rastrea metas específicas para cada alumno.'
-    }
+  const theme = useTheme();
+  const galleryImages = [
+    { src: "/1.png", alt: "Imagen 1" },
+    { src: "/2.png", alt: "Imagen 2" },
+    { src: "/3.png", alt: "Imagen 3" },
   ];
 
   return (
-    <Box sx={{ 
-      backgroundColor: 'background.default', 
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      <Navbar />
-      
-      <Container maxWidth="lg" sx={{ flexGrow: 1, py: 4 }}>
+    <Box
+      sx={{
+        position: "relative",
+        backgroundColor: "background.default",
+        minHeight: "100vh",
+        overflow: "hidden",
+      }}
+    >
+      {/* Círculos decorativos */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "-10%",
+          left: "-10%",
+          width: 500,
+          height: 500,
+          borderRadius: "50%",
+          backgroundColor: `${theme.palette.secondary.main}20`, // fucsia con opacidad
+          filter: "blur(100px)",
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          top: "20%",
+          right: "-10%",
+          width: 400,
+          height: 400,
+          borderRadius: "50%",
+          backgroundColor: `${theme.palette.primary.main}20`, // naranja con opacidad
+          filter: "blur(100px)",
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "-10%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: 350,
+          height: 350,
+          borderRadius: "50%",
+          backgroundColor: `${theme.palette.secondary.main}20`, // fucsia con opacidad
+          filter: "blur(100px)",
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "10%",
+          right: "5%",
+          width: 250,
+          height: 250,
+          borderRadius: "50%",
+          backgroundColor: `${theme.palette.primary.main}20`, // naranja con opacidad
+          filter: "blur(100px)",
+          zIndex: 0,
+        }}
+      />
+
+      <Container
+        maxWidth="lg"
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          py: 4,
+        }}
+      >
         <Grid container spacing={4} alignItems="center">
           {/* Sección de Presentación */}
           <Grid item xs={12} md={6}>
-            <Typography 
-              variant="h3" 
-              component="h1" 
-              gutterBottom 
-              sx={{ fontWeight: 'bold', color: 'primary.main' }}
-            >
-              Yu-Routine
+            <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: "bold", color: theme.palette.secondary.main }}>
+              Tus ejercicios, <br /> en la palma de tu mano
             </Typography>
-            <Typography 
-              variant="h5" 
-              component="p" 
-              gutterBottom 
-              sx={{ mb: 3 }}
-            >
-              La plataforma definitiva para entrenadores deportivos
+
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: "normal" }}>
+              Visualiza tus rutinas en cualquier momento, completa los pesos y repeticiones de tus ejercicios, tu entrenadora te ayudará a mejorar tu rendimiento!
             </Typography>
-            <Typography 
-              variant="body1" 
-              sx={{ mb: 3 }}
-            >
-              Simplifica la creación, gestión y seguimiento de rutinas de entrenamiento. 
-              Optimiza el rendimiento de tus alumnos con herramientas inteligentes.
-            </Typography>
-            
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Link href="/login/entrenador" passHref>
-                <Button 
-                  variant="contained" 
-                  color="primary" 
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Link href="/login" passHref>
+                <Button
+                  variant="contained"
+                  color="primary"
                   size="large"
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    color: 'white', // Añadido color blanco para el texto
+                  }}
                 >
-                  Entrar como Entrenador
-                </Button>
-              </Link>
-              <Link href="/login/alumno" passHref>
-                <Button 
-                  variant="outlined" 
-                  color="primary" 
-                  size="large"
-                >
-                  Entrar como Alumno
+                  EMPEZAR
                 </Button>
               </Link>
             </Box>
           </Grid>
 
-          {/* Sección de Características */}
+          {/* Galería de Imágenes */}
           <Grid item xs={12} md={6}>
-            <Paper 
-              elevation={3} 
-              sx={{ 
-                p: 3, 
-                backgroundColor: 'background.paper',
-                borderRadius: 2 
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 2,
+                height: "100%",
+                alignItems: "center",
               }}
             >
-              <Typography 
-                variant="h5" 
-                component="h2" 
-                gutterBottom 
-                sx={{ textAlign: 'center', mb: 3 }}
-              >
-                Características
-              </Typography>
-              <List>
-                {features.map((feature, index) => (
-                  <ListItem key={index}>
-                    <ListItemIcon>{feature.icon}</ListItemIcon>
-                    <ListItemText 
-                      primary={feature.title} 
-                      secondary={feature.description} 
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
+              {galleryImages.map((image, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    position: "relative",
+                    width: "100%",
+                    aspectRatio: "1/1",
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    boxShadow: 3,
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                    },
+                  }}
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{
+                      objectFit: "cover",
+                      objectPosition: "center",
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
           </Grid>
         </Grid>
       </Container>

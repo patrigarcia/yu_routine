@@ -4,15 +4,33 @@ import { createTheme } from "@mui/material/styles";
 
 export const theme = createTheme({
   palette: {
-    mode: "light", // or 'dark'
+    mode: "light",
     primary: {
-      main: "#1976d2", // Puedes personalizar este color
+      main: "#ff8519", // Naranja principal
+      light: "#ffa04d",
+      dark: "#c65d00",
     },
     secondary: {
-      main: "#dc004e", // Puedes personalizar este color
+      main: "#ff02b5", // Fucsia principal
+      light: "#ff3ac5",
+      dark: "#c20088",
+    },
+    background: {
+      default: "#ffffff",
+      paper: "#f5f5f5",
     },
   },
   typography: {
     fontFamily: '"Geist", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: 8,
+        },
+      },
+    },
   },
 });

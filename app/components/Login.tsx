@@ -4,85 +4,132 @@ import React, { useState } from 'react';
 import { 
   Container, 
   Typography, 
+  Box, 
   TextField, 
   Button, 
-  Box, 
-  Paper 
+  Paper,
+  Alert,
+  ToggleButton,
+  ToggleButtonGroup
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
-interface LoginProps {
-  type: 'alumno' | 'entrenador';
-}
-
-export default function Login({ type }: LoginProps) {
-  const [codigo, setCodigo] = useState('');
+export default function Login() {
+  const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [userType, setUserType] = useState<'alumno' | 'entrenador'>('alumno');
   const router = useRouter();
 
-  const handleLogin = async () => {
-    // Lógica de validación de código
-    if (codigo.trim() === '') {
-      setError('Por favor ingrese un código');
-      return;
-    }
-
-    try {
-      // Aquí iría la lógica de autenticación con MongoDB
-      // Por ahora, un ejemplo simple
-      if (type === 'alumno' && codigo === 'ALUMNO123') {
-        router.push('/alumno');
-      } else if (type === 'entrenador' && codigo === 'TRAINER456') {
-        router.push('/entrenador');
-      } else {
-        setError('Código inválido');
-      }
-    } catch (err) {
-      setError('Error en la autenticación');
+  const handleLogin = () => {
+    // Código para entrenador hardcodeado
+    if (userType === 'entrenador' && code.toLowerCase() === 'yuli25') {
+      router.push('/entrenador');
+    } 
+    // Código para alumno (6 dígitos)
+    else if (userType === 'alumno' && /^\d{6}$/.test(code)) {
+      router.push('/alumno');
+    } 
+    else {
+      setError('Código inválido. Intenta de nuevo.');
     }
   };
 
   return (
-    <Container maxWidth="xs">
+    <Container maxWidth="xs" sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '100vh',
+      py: 4 // Añadido padding vertical para subir el modal
+    }}>
       <Paper 
         elevation={3} 
         sx={{ 
-          marginTop: 8, 
+          padding: 4, 
           display: 'flex', 
           flexDirection: 'column', 
-          alignItems: 'center', 
-          p: 4 
+          alignItems: 'center',
+          width: '100%',
+          maxWidth: 400, // Límite de ancho para mantener un diseño compacto
         }}
       >
-        <Typography component="h1" variant="h5">
-          Login {type === 'alumno' ? 'Alumno' : 'Entrenador'}
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 'bold', 
+            color: '#ff02b5',
+            mb: 3 
+          }}
+        >
+          Iniciar Sesión
         </Typography>
-        <Box component="form" sx={{ width: '100%', mt: 1 }}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            label="Código de Acceso"
-            value={codigo}
-            onChange={(e) => {
-              setCodigo(e.target.value);
-              setError('');
-            }}
-            error={!!error}
-            helperText={error}
-          />
-          <Button
-            type="button"
-            fullWidth
-            variant="contained"
-            color={type === 'alumno' ? 'primary' : 'secondary'}
-            sx={{ mt: 3, mb: 2 }}
-            onClick={handleLogin}
+
+        <ToggleButtonGroup
+          color="primary"
+          value={userType}
+          exclusive
+          onChange={(e, newUserType) => {
+            if (newUserType) setUserType(newUserType);
+          }}
+          sx={{ mb: 3 }}
+        >
+          <ToggleButton value="alumno">Soy Alumno</ToggleButton>
+          <ToggleButton value="entrenador">Soy Entrenador</ToggleButton>
+        </ToggleButtonGroup>
+
+        <TextField 
+          fullWidth
+          label={`Código de ${userType === 'alumno' ? 'Alumno' : 'Entrenador'}`} 
+          variant="outlined"
+          value={code}
+          onChange={(e) => {
+            setCode(e.target.value);
+            setError('');
+          }}
+          inputProps={{ 
+            maxLength: userType === 'alumno' ? 6 : undefined,
+            style: { textTransform: 'uppercase' }
+          }}
+          sx={{ mb: 2 }}
+        />
+
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ width: '100%', mb: 2 }}
           >
-            Ingresar
-          </Button>
-        </Box>
+            {error}
+          </Alert>
+        )}
+
+        <Button 
+          fullWidth
+          variant="contained" 
+          color="primary"
+          onClick={handleLogin}
+          sx={{ 
+            py: 1.5,
+            color: 'white' // Texto en blanco
+          }}
+        >
+          Ingresar
+        </Button>
+
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            mt: 2, 
+            textAlign: 'center', 
+            color: 'text.secondary' 
+          }}
+        >
+          {userType === 'alumno' 
+            ? 'Ingresa tu código de 6 dígitos' 
+            : 'Ingresa tu código de entrenador'}
+        </Typography>
       </Paper>
     </Container>
   );
