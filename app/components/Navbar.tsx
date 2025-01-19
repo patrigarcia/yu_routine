@@ -37,6 +37,7 @@ export default function Navbar() {
               alt="Yu-Routine Logo" 
               width={100} 
               height={50} 
+              priority
               style={{ 
                 objectFit: 'contain', 
                 width: 'auto', 

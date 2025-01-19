@@ -7,6 +7,7 @@ import Link from "next/link";
 
 export default function Home() {
   const theme = useTheme();
+  
   const galleryImages = [
     { src: "/1.png", alt: "Imagen 1" },
     { src: "/2.png", alt: "Imagen 2" },
