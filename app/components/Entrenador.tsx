@@ -23,11 +23,16 @@ import {
   Chip,
   Modal,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -72,6 +77,72 @@ export default function Entrenador() {
   const [alumnos, setAlumnos] = useState<Alumno[]>([]);
   const [isSearchFiltered, setIsSearchFiltered] = useState(false);
   const [selectedRutina, setSelectedRutina] = useState<Rutina | null>(null);
+
+  // Estados para cambiar contraseña
+  const [openCambiarPassword, setOpenCambiarPassword] = useState(false);
+  const [passwordActual, setPasswordActual] = useState("");
+  const [nuevaPassword, setNuevaPassword] = useState("");
+  const [confirmarPassword, setConfirmarPassword] = useState("");
+
+  // Función para abrir modal de cambiar contraseña
+  const handleCambiarPassword = () => {
+    setOpenCambiarPassword(true);
+  };
+
+  // Función para cerrar modal de cambiar contraseña
+  const handleCloseCambiarPassword = () => {
+    setOpenCambiarPassword(false);
+    // Limpiar campos
+    setPasswordActual("");
+    setNuevaPassword("");
+    setConfirmarPassword("");
+  };
+
+  // Función para guardar nueva contraseña
+  const handleGuardarPassword = async () => {
+    // Validar campos
+    if (!passwordActual || !nuevaPassword || !confirmarPassword) {
+      alert("Por favor, complete todos los campos");
+      return;
+    }
+
+    // Validar longitud de la nueva contraseña
+    if (!/^\d{6}$/.test(nuevaPassword)) {
+      alert("La nueva contraseña debe ser de 6 dígitos");
+      return;
+    }
+
+    // Validar que las contraseñas coincidan
+    if (nuevaPassword !== confirmarPassword) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/entrenador/cambiar-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          codigoAcceso: 'yuli25', // Código de acceso hardcodeado por ahora
+          nuevaContrasena: nuevaPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        alert('Contraseña actualizada exitosamente');
+        setOpenCambiarPassword(false);
+      } else {
+        alert(data.message || 'Error al cambiar la contraseña');
+      }
+    } catch (error) {
+      console.error('Error al cambiar contraseña:', error);
+      alert('Error al cambiar la contraseña');
+    }
+  };
 
   // Función para obtener rutinas
   const fetchRutinas = async () => {
@@ -187,9 +258,9 @@ export default function Entrenador() {
   };
 
   const handleEditarRutina = () => {
-    if (selectedAlumno) {
+    if (selectedRutina) {
       // Navegar a la página de edición de rutina con el código del alumno
-      router.push(`/crear-rutina?codigoAlumno=${selectedAlumno.codigoAlumno}`);
+      router.push(`/editar-rutina?codigoAlumno=${selectedRutina.codigoAlumno}`);
     }
   };
 
@@ -244,8 +315,16 @@ export default function Entrenador() {
             }}
           />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: "bold", color: theme.palette.secondary.main }}>
+            <Typography variant="h4" sx={{ fontWeight: "bold", color: theme.palette.secondary.main, display: 'inline-flex', alignItems: 'center', gap: 1 }}>
               Yuliana Fanaro
+              <IconButton 
+                color="primary" 
+                size="small" 
+                sx={{ ml: 1 }}
+                onClick={handleCambiarPassword}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
             </Typography>
             <Typography variant="subtitle1">Profesora de Educación física | Personal Trainer</Typography>
           </Box>
@@ -315,7 +394,9 @@ export default function Entrenador() {
                   mb: 2,
                 }}
               >
-                <Typography variant="h5">{selectedAlumno.nombreAlumno}</Typography>
+                <Typography variant="h5">
+                  {selectedAlumno.nombreAlumno}
+                </Typography>
                 <Box>
                   <IconButton onClick={handleEditarRutina}>
                     <EditIcon />
@@ -386,168 +467,273 @@ export default function Entrenador() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backdropFilter: "blur(4px)",
           }}
         >
           <Box
             sx={{
-              bgcolor: "background.default",
-              boxShadow: "0 15px 50px rgba(0,0,0,0.2)",
-              borderRadius: 4,
-              maxWidth: 700,
               width: "90%",
+              maxWidth: 800,
               maxHeight: "90vh",
               overflowY: "auto",
-              border: "1px solid",
-              borderColor: "divider",
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              p: 3,
               position: "relative",
-              p: 0, // Eliminar padding inicial
             }}
           >
-            {/* Encabezado con gradiente */}
-            <Box
-              sx={{
-                background: `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.secondary.light})`,
-                color: "white",
-                py: 2,
-                px: 3,
-                borderTopLeftRadius: 16,
-                borderTopRightRadius: 16,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                Detalles de rutina
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+              <Typography variant="h5" color="primary">
+                Detalles de Rutina
               </Typography>
-              <IconButton
-                onClick={handleCloseRutinaModal}
-                sx={{
-                  color: "white",
-                  "&:hover": {
-                    bgcolor: "rgba(255,255,255,0.2)",
-                  },
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
+              <Box>
+                <IconButton color="primary" onClick={handleEditarRutina} sx={{ mr: 1 }}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton color="secondary" onClick={handleCloseRutinaModal}>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
             </Box>
-
-            {/* Contenido del modal */}
-            <Box sx={{ p: 3 }}>
-              <Grid container spacing={2} sx={{ mb: 2, alignItems: "center", height: "100%" }}>
-                <Grid item xs={12} sm={4}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      bgcolor: theme.palette.primary.light + "20",
-                      borderRadius: 2,
-                    }}
-                  >
-                    <Typography variant="subtitle2" color="primary" gutterBottom>
-                      Nombre del alumno
-                    </Typography>
-                    <Typography variant="h6">{selectedRutina.nombreAlumno}</Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      bgcolor: theme.palette.secondary.light + "20",
-                      borderRadius: 2,
-                    }}
-                  >
-                    <Typography variant="subtitle2" color="secondary" gutterBottom>
-                      Código de alumno
-                    </Typography>
-                    <Typography variant="h6">{selectedRutina.codigoAlumno}</Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 2,
-                      bgcolor: theme.palette.success.light + "20",
-                      borderRadius: 2,
-                    }}
-                  >
-                    <Typography variant="subtitle2" color="success" gutterBottom>
-                      Fecha de Creación
-                    </Typography>
-                    <Typography variant="h6">{formatearFecha(selectedRutina.fechaCreacion)}</Typography>
-                  </Paper>
-                </Grid>
-              </Grid>
-
-              {/* Listado de Ejercicios */}
-              {selectedRutina.ejercicios.map((dia: Ejercicio[], diaIndex: number) => (
-                <Accordion
-                  key={diaIndex}
+            <Grid container spacing={2} sx={{ mb: 2, alignItems: "center", height: "100%" }}>
+              <Grid item xs={12} sm={4}>
+                <Paper
+                  elevation={0}
                   sx={{
-                    mb: 2,
-                    "&:before": { display: "none" },
+                    p: 2,
+                    bgcolor: theme.palette.primary.light + "20",
                     borderRadius: 2,
-                    boxShadow: "none",
-                    border: "1px solid",
-                    borderColor: "divider",
                   }}
                 >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    sx={{
-                      bgcolor: theme.palette.primary.light + "10",
-                      "&:hover": {
-                        bgcolor: theme.palette.primary.light + "20",
-                      },
-                    }}
-                  >
-                    <Typography variant="subtitle1" color="primary">
-                      Día {diaIndex + 1}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <TableContainer>
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Ejercicio</TableCell>
-                            <TableCell>Series</TableCell>
-                            <TableCell>Repeticiones</TableCell>
-                            <TableCell>Kilos</TableCell>
-                            <TableCell>Descanso</TableCell>
+                  <Typography variant="subtitle2" color="primary" gutterBottom>
+                    Nombre del alumno
+                  </Typography>
+                  <Typography variant="h6">{selectedRutina.nombreAlumno}</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    bgcolor: theme.palette.secondary.light + "20",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography variant="subtitle2" color="secondary" gutterBottom>
+                    Código de alumno
+                  </Typography>
+                  <Typography variant="h6">{selectedRutina.codigoAlumno}</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    bgcolor: theme.palette.success.light + "20",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography variant="subtitle2" color="success" gutterBottom>
+                    Fecha de Creación
+                  </Typography>
+                  <Typography variant="h6">{formatearFecha(selectedRutina.fechaCreacion)}</Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+
+            {/* Listado de Ejercicios */}
+            {selectedRutina.ejercicios.map((dia: Ejercicio[], diaIndex: number) => (
+              <Accordion
+                key={diaIndex}
+                sx={{
+                  mb: 2,
+                  "&:before": { display: "none" },
+                  borderRadius: 2,
+                  boxShadow: "none",
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={{
+                    bgcolor: theme.palette.primary.light + "10",
+                    "&:hover": {
+                      bgcolor: theme.palette.primary.light + "20",
+                    },
+                  }}
+                >
+                  <Typography variant="subtitle1" color="primary">
+                    Día {diaIndex + 1}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Ejercicio</TableCell>
+                          <TableCell>Series</TableCell>
+                          <TableCell>Repeticiones</TableCell>
+                          <TableCell>Kilos</TableCell>
+                          <TableCell>Descanso</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {dia.map((ejercicio: Ejercicio, ejercicioIndex: number) => (
+                          <TableRow
+                            key={ejercicioIndex}
+                            hover
+                            sx={{
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }}
+                          >
+                            <TableCell>{ejercicio.ejercicio}</TableCell>
+                            <TableCell>{ejercicio.series}</TableCell>
+                            <TableCell>{ejercicio.repeticiones}</TableCell>
+                            <TableCell>{ejercicio.kilos}</TableCell>
+                            <TableCell>{ejercicio.descanso}</TableCell>
                           </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {dia.map((ejercicio: Ejercicio, ejercicioIndex: number) => (
-                            <TableRow
-                              key={ejercicioIndex}
-                              hover
-                              sx={{
-                                "&:last-child td, &:last-child th": { border: 0 },
-                              }}
-                            >
-                              <TableCell>{ejercicio.ejercicio}</TableCell>
-                              <TableCell>{ejercicio.series}</TableCell>
-                              <TableCell>{ejercicio.repeticiones}</TableCell>
-                              <TableCell>{ejercicio.kilos}</TableCell>
-                              <TableCell>{ejercicio.descanso}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </Box>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </AccordionDetails>
+              </Accordion>
+            ))}
           </Box>
         </Modal>
       )}
+
+      {/* Modal de Cambiar Contraseña */}
+      <Modal
+        open={openCambiarPassword}
+        onClose={handleCloseCambiarPassword}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          sx={{
+            backgroundColor: "white",
+            borderRadius: 4,
+            boxShadow: '0 15px 50px rgba(0,0,0,0.2)',
+            p: 4,
+            width: "90%",
+            maxWidth: 500,
+            maxHeight: "80vh",
+            overflowY: "auto",
+            border: '1px solid rgba(0,0,0,0.1)',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 10,
+              background: 'linear-gradient(to right, #FF6B35, #FF9F1C)',
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+            }
+          }}
+        >
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              mb: 3, 
+              fontWeight: 600, 
+              color: '#333', 
+              textAlign: 'center',
+              letterSpacing: -0.5 
+            }}
+          >
+            Cambiar Contraseña
+          </Typography>
+          <TextField
+            fullWidth
+            label="Contraseña Actual"
+            type="password"
+            variant="outlined"
+            value={passwordActual}
+            onChange={(e) => setPasswordActual(e.target.value)}
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 3,
+                '&.Mui-focused fieldset': {
+                  borderColor: '#FF6B35',
+                },
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: '#FF6B35',
+              }
+            }}
+          />
+          <TextField
+            fullWidth
+            label="Nueva Contraseña"
+            type="password"
+            variant="outlined"
+            value={nuevaPassword}
+            onChange={(e) => setNuevaPassword(e.target.value)}
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 3,
+                '&.Mui-focused fieldset': {
+                  borderColor: '#FF6B35',
+                },
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: '#FF6B35',
+              }
+            }}
+          />
+          <TextField
+            fullWidth
+            label="Confirmar Contraseña"
+            type="password"
+            variant="outlined"
+            value={confirmarPassword}
+            onChange={(e) => setConfirmarPassword(e.target.value)}
+            sx={{ 
+              mb: 3,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 3,
+                '&.Mui-focused fieldset': {
+                  borderColor: '#FF6B35',
+                },
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: '#FF6B35',
+              }
+            }}
+          />
+          <Button 
+            fullWidth 
+            variant="contained" 
+            onClick={handleGuardarPassword}
+            sx={{
+              backgroundColor: '#FF6B35',
+              color: 'white',
+              borderRadius: 3,
+              py: 1.5,
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: '#FF9F1C'
+              }
+            }}
+          >
+            Guardar Cambios
+          </Button>
+        </Box>
+      </Modal>
 
       {/* Sección de Rutinas */}
       <Box sx={{ mt: 4 }}>
@@ -598,17 +784,19 @@ export default function Entrenador() {
               justifyContent: "space-between",
             }}
           >
-            <Grid 
-              container 
-              spacing={2} 
-              sx={{ 
-                mb: 2, 
-                alignItems: "center", 
-                height: "100%" 
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                mb: 2,
+                alignItems: "center",
+                height: "100%",
               }}
             >
               <Grid item xs={12} sm={3}>
-                <Typography variant="subtitle1">{rutina.nombreAlumno}</Typography>
+                <Typography variant="subtitle1">
+                  {rutina.nombreAlumno}
+                </Typography>
               </Grid>
               <Grid item xs={12} sm={3}>
                 <Typography variant="body2" color="textSecondary">

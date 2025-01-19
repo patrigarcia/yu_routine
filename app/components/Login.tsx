@@ -1,9 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
-import { Container, Typography, Box, TextField, Button, Paper, Alert, ToggleButton, ToggleButtonGroup, createTheme, ThemeProvider } from "@mui/material";
-import Image from "next/image";
+import {
+  Container,
+  Typography,
+  Box,
+  TextField,
+  Button,
+  Paper,
+  useTheme,
+  Alert,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useAuthStore } from "@/lib/store/authStore"; // Importar store
+import { createTheme, ThemeProvider } from "@mui/material";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 // Tema de estilo Apple
 const appleTheme = createTheme({
@@ -63,17 +75,26 @@ export default function Login() {
   const [error, setError] = useState("");
   const [userType, setUserType] = useState<"alumno" | "entrenador">("alumno");
   const router = useRouter();
+  const { login } = useAuthStore();
 
   const handleLogin = () => {
     // Código para entrenador hardcodeado
     if (userType === "entrenador" && code.toLowerCase() === "yuli25") {
+      login("entrenador");
       router.push("/entrenador");
     }
     // Código para alumno (6 dígitos)
     else if (userType === "alumno" && /^\d{6}$/.test(code)) {
+      login("alumno");
       router.push("/alumno");
     } else {
       setError("Código inválido. Intenta de nuevo.");
+      setCode(""); // Limpiar el input cuando el código es inválido
+
+      // Limpiar el error después de 4 segundos
+      setTimeout(() => {
+        setError("");
+      }, 4000);
     }
   };
 
@@ -104,11 +125,13 @@ export default function Login() {
           <Image
             src="/yu.png"
             alt="Yu Routine Logo"
-            width={200}
-            height={200}
+            width={150}
+            height={150}
             style={{
               marginBottom: "32px",
               objectFit: "contain",
+              width: "auto",
+              height: "auto",
             }}
           />
 

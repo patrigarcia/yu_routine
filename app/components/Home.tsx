@@ -89,11 +89,36 @@ export default function Home() {
         <Grid container spacing={4} alignItems="center">
           {/* Sección de Presentación */}
           <Grid item xs={12} md={6}>
-            <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: "bold", color: theme.palette.secondary.main }}>
+            <Typography 
+              variant="h2" 
+              component="h1" 
+              gutterBottom 
+              sx={{ 
+                fontWeight: "bold", 
+                color: theme.palette.secondary.main,
+                fontSize: {
+                  xs: '2.5rem',   // Tamaño para móviles
+                  sm: '3rem',     // Tamaño para tablets pequeñas
+                  md: '4rem'      // Tamaño para escritorio
+                },
+                lineHeight: 1.2
+              }}
+            >
               Tus ejercicios, <br /> en la palma de tu mano
             </Typography>
 
-            <Typography variant="h6" sx={{ mb: 3, fontWeight: "normal" }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                mb: 3, 
+                fontWeight: "normal",
+                fontSize: {
+                  xs: '1rem',     // Tamaño para móviles
+                  sm: '1.125rem', // Tamaño para tablets pequeñas
+                  md: '1.25rem'   // Tamaño para escritorio
+                }
+              }}
+            >
               Visualiza tus rutinas en cualquier momento, completa los pesos y repeticiones de tus ejercicios, tu entrenadora te ayudará a mejorar tu rendimiento!
             </Typography>
 
