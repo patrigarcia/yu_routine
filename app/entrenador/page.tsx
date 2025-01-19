@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import EntrenadorComponent from "@/app/components/Entrenador";
+import EntrenadorComponent from "../components/Entrenador";
 
 export const metadata: Metadata = {
   title: "YuRoutine | Panel de Yuliana",

@@ -1,18 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Container,
-  Typography,
-  Box,
-  TextField,
-  Button,
-  Paper,
-  useTheme,
-  Alert,
-} from "@mui/material";
+import { Container, Typography, Box, TextField, Button, Paper, useTheme, Alert } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/store/authStore"; // Importar store
+import { useAuthStore } from "lib/store/authStore";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
@@ -87,9 +78,7 @@ export default function Login() {
     }
 
     // Validación de formato según tipo de usuario
-    const isValidCode = userType === "entrenador" 
-      ? code.toLowerCase() === "yuli25"
-      : /^[A-Z]{4}\d{2}$/i.test(code);  // Formato: 4 letras mayúsculas + 2 dígitos
+    const isValidCode = userType === "entrenador" ? code.toLowerCase() === "yuli25" : /^[A-Z]{4}\d{2}$/i.test(code); // Formato: 4 letras mayúsculas + 2 dígitos
 
     if (!isValidCode) {
       setError(`Código de ${userType} inválido`);
@@ -105,14 +94,14 @@ export default function Login() {
       }
 
       // Login de alumno
-      const response = await fetch('/api/alumno/login', {
-        method: 'POST',
+      const response = await fetch("/api/alumno/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           codigo: code.toUpperCase(), // Convertir a mayúsculas
-          userType 
+          userType,
         }),
       });
 
@@ -130,7 +119,7 @@ export default function Login() {
         setCode(""); // Limpiar el input
       }
     } catch (error) {
-      console.error('Error en login:', error);
+      console.error("Error en login:", error);
       setError("Error de conexión. Intenta de nuevo.");
       setCode(""); // Limpiar el input
     }
@@ -172,7 +161,7 @@ export default function Login() {
               width: "auto",
               height: "auto",
               maxWidth: "150px",
-              maxHeight: "150px"
+              maxHeight: "150px",
             }}
           />
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import Entrenador from '@/lib/models/Entrenador';
+import connectDB from '../../../../lib/mongodb';
+import Entrenador from '../../../../lib/models/Entrenador';
 import jwt from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {

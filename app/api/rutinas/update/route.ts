@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Rutina from '@/lib/models/Rutina';
-import connectDB from '@/lib/mongodb';
+import Rutina from '../../../../lib/models/Rutina';
+import connectDB from '../../../../lib/mongodb';
 
 export async function PUT(request: NextRequest) {
   try {

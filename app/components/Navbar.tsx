@@ -1,20 +1,128 @@
 "use client";
 
-import React from "react";
-import { AppBar, Toolbar, Button, Box, Container, Typography } from "@mui/material";
+import React, { useState } from "react";
+import { AppBar, Toolbar, Button, Box, Container, Typography, Drawer, List, ListItem, ListItemText, IconButton, useMediaQuery, useTheme } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
 import Image from "next/image";
 import Link from "next/link";
-import { useAuthStore } from "@/lib/store/authStore"; // Importar store
+import { useAuthStore } from "lib/store/authStore";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const { isLoggedIn, logout } = useAuthStore(); // Usar store y agregar logout
+  const { isLoggedIn, logout, userType } = useAuthStore();
   const router = useRouter();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleLogout = () => {
-    logout(); // Llamar a la función de logout del store
-    router.push('/'); // Redirigir al home después de cerrar sesión
+    logout();
+    router.push("/");
+    setMobileOpen(false);
   };
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const getAreaLink = () => {
+    if (!isLoggedIn) return "/login";
+    switch (userType) {
+      case "alumno":
+        return "/alumno";
+      case "entrenador":
+        return "/entrenador";
+      default:
+        return "/login";
+    }
+  };
+
+  const navItems = [
+    { label: "Home", href: "/" },
+    ...(isLoggedIn
+      ? [
+          { label: "Mi Área", href: getAreaLink() },
+          { label: "Cerrar sesión", action: handleLogout },
+        ]
+      : [{ label: "Iniciar sesión", href: "/login" }]),
+  ];
+
+  const renderNavItems = (isMobileMenu = false) => {
+    return navItems.map((item, index) =>
+      item.action ? (
+        <Button
+          key={index}
+          onClick={item.action}
+          fullWidth={isMobileMenu}
+          color="primary"
+          sx={{
+            my: 1,
+            fontSize: "1.1em",
+            color: "#333",
+            "&:hover": {
+              color: "#FF1493",
+              backgroundColor: "transparent",
+            },
+          }}
+        >
+          {item.label}
+        </Button>
+      ) : (
+        <Link href={item.href} passHref key={index}>
+          <Button
+            fullWidth={isMobileMenu}
+            color="primary"
+            onClick={() => setMobileOpen(false)}
+            sx={{
+              my: 1,
+              fontSize: "1.1em",
+              color: "#333",
+              "&:hover": {
+                color: "#FF1493",
+                backgroundColor: "transparent",
+              },
+            }}
+          >
+            {item.label}
+          </Button>
+        </Link>
+      )
+    );
+  };
+
+  const mobileMenu = (
+    <Drawer
+      variant="temporary"
+      anchor="right"
+      open={mobileOpen}
+      onClose={handleDrawerToggle}
+      ModalProps={{
+        keepMounted: true, // Better open performance on mobile.
+      }}
+      sx={{
+        display: { xs: "block", md: "none" },
+        "& .MuiDrawer-paper": {
+          boxSizing: "border-box",
+          width: 240,
+          backgroundColor: "white",
+        },
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          p: 2,
+        }}
+      >
+        <IconButton onClick={handleDrawerToggle}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <List>{renderNavItems(true)}</List>
+    </Drawer>
+  );
 
   return (
     <AppBar
@@ -50,62 +158,28 @@ export default function Navbar() {
             />
           </Box>
 
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Link href="/" passHref>
-              <Button
-                color="primary"
-                sx={{
-                  my: 2,
-                  mx: 1,
-                  fontSize: "1.1em",
-                  color: "#333",
-                  "&:hover": {
-                    color: "#FF1493", // Color fucsia
-                    backgroundColor: "transparent",
-                  },
-                }}
-              >
-                Home
-              </Button>
-            </Link>
-            {!isLoggedIn && (
-              <Link href="/login" passHref>
-                <Button
-                  color="primary"
-                  sx={{
-                    my: 2,
-                    mx: 1,
-                    fontSize: "1.1em",
-                    color: "#333",
-                    "&:hover": {
-                      color: "#FF1493", // Color fucsia
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  Ingresar
-                </Button>
-              </Link>
-            )}
-            {isLoggedIn && (
-              <Button
-                color="primary"
-                onClick={handleLogout}
-                sx={{
-                  my: 2,
-                  mx: 1,
-                  fontSize: "1.1em",
-                  color: "#333",
-                  "&:hover": {
-                    color: "#FF1493", // Color fucsia
-                    backgroundColor: "transparent",
-                  },
-                }}
-              >
-                Cerrar sesión
-              </Button>
-            )}
+          {/* Desktop Navigation */}
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              alignItems: "center",
+            }}
+          >
+            {renderNavItems()}
           </Box>
+
+          {/* Mobile Hamburger Menu */}
+          <Box
+            sx={{
+              display: { xs: "block", md: "none" },
+            }}
+          >
+            <IconButton color="inherit" aria-label="open drawer" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
+              <MenuIcon />
+            </IconButton>
+          </Box>
+
+          {mobileMenu}
         </Toolbar>
       </Container>
     </AppBar>

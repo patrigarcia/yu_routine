@@ -1,4 +1,4 @@
-import AlumnoComponent from '@/app/components/Alumno';
+import AlumnoComponent from "../components/Alumno";
 
 export default function PaginaAlumno() {
   return <AlumnoComponent />;

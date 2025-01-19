@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import LoginComponent from '@/app/components/Login';
+import LoginComponent from '../components/Login';
 
 export const metadata: Metadata = {
   title: 'YuRoutine | Iniciar sesión',

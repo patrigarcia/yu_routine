@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useRouter } from 'next/navigation';
-import { useAlumnoAuthStore } from '@/lib/store/alumnoAuthStore';
+import { useAuthStore } from '../../../lib/store/authStore';
 
 const alumnoTheme = createTheme({
   palette: {
@@ -43,7 +43,7 @@ const alumnoTheme = createTheme({
 export default function AlumnoRutinaPage() {
   const [rutina, setRutina] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { codigoAlumno, isLoggedIn, logout } = useAlumnoAuthStore();
+  const { codigoAlumno, isLoggedIn, logout } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {

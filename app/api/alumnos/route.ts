@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
-import { Alumno, IAlumno } from "@/lib/models/Alumno";
-import connectDB from "@/lib/mongodb";
+import { Alumno, IAlumno } from '../../../lib/models/Alumno';
+import connectDB from '../../../lib/mongodb';
 
 export async function GET(request: NextRequest) {
   try {
