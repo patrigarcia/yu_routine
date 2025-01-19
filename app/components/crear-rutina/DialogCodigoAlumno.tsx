@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography, Snackbar, Alert } from "@mui/material";
 
 interface DialogCodigoAlumnoProps {
@@ -7,6 +8,16 @@ interface DialogCodigoAlumnoProps {
   codigoAlumno: string;
   nombreAlumno?: string;
 }
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#FF6B35", // Color anaranjado principal
+      light: "#FF9F1C", // Tono más claro
+      dark: "#FF4D00", // Tono más oscuro
+    },
+  },
+});
 
 export default function DialogCodigoAlumno({ open, onClose, codigoAlumno, nombreAlumno = "" }: DialogCodigoAlumnoProps) {
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -17,7 +28,7 @@ export default function DialogCodigoAlumno({ open, onClose, codigoAlumno, nombre
   };
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <Dialog open={open} onClose={onClose} aria-labelledby="codigo-alumno-dialog">
         <DialogTitle id="codigo-alumno-dialog">Código de alumno generado</DialogTitle>
         <DialogContent>
@@ -55,6 +66,6 @@ export default function DialogCodigoAlumno({ open, onClose, codigoAlumno, nombre
           Código copiado al portapapeles
         </Alert>
       </Snackbar>
-    </>
+    </ThemeProvider>
   );
 }

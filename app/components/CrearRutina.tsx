@@ -32,9 +32,9 @@ const appleTheme = createTheme({
   },
   palette: {
     primary: {
-      main: "#007AFF", // Apple Blue
-      light: "#5AC8FA",
-      dark: "#0056b3",
+      main: "#FF6B35", // Color anaranjado principal
+      light: "#FF9F1C", // Tono más claro
+      dark: "#FF4D00", // Tono más oscuro
     },
     background: {
       default: "#F2F2F7", // Light gray background
@@ -64,6 +64,7 @@ const appleTheme = createTheme({
           fontWeight: 600,
         },
         contained: {
+          color: "white", // Texto blanco para botones contenidos
           boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
           "&:hover": {
             boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
@@ -283,15 +284,15 @@ export default function CrearRutina() {
             <Button
               variant="contained"
               color="primary"
-              sx={{
-                borderRadius: 3,
-                px: 4,
-                py: 1.5,
-              }}
               onClick={enviarRutina}
+              sx={{
+                color: "white", // Texto blanco
+                fontWeight: 600,
+                textTransform: "none",
+              }}
               disabled={ejercicios.length === 0}
             >
-              Crear Rutina
+              Crear rutina
             </Button>
           </Box>
         </Paper>

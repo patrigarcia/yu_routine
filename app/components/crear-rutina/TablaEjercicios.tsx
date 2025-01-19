@@ -262,13 +262,13 @@ export default function TablaEjercicios({ diasRutina, ejerciciosPorDia, ejercici
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Video</TableCell>
-                  <TableCell>Ejercicio</TableCell>
-                  <TableCell>Semana</TableCell>
-                  <TableCell>Series</TableCell>
-                  <TableCell>Repeticiones</TableCell>
-                  <TableCell>Kilos</TableCell>
-                  <TableCell>Descanso</TableCell>
+                  <TableCell sx={{ width: "5%", textAlign: "left" }}>Video</TableCell>
+                  <TableCell sx={{ width: "25%", textAlign: "left" }}>Ejercicio</TableCell>
+                  <TableCell sx={{ width: "5%", textAlign: "left" }}>Semana</TableCell>
+                  <TableCell sx={{ width: "5%", textAlign: "left" }}>Series</TableCell>
+                  <TableCell sx={{ width: "5%", textAlign: "left" }}>Repeticiones</TableCell>
+                  <TableCell sx={{ width: "15%", textAlign: "left" }}>Kilos (por lado)</TableCell>
+                  <TableCell sx={{ width: "5%", textAlign: "left" }}>Descanso</TableCell>
                   <TableCell sx={{ width: "1%", textAlign: "center" }}>Acciones</TableCell>
                 </TableRow>
               </TableHead>

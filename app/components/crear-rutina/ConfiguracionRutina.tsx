@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, TextField, useTheme } from "@mui/material";
+import { Box, Typography, TextField, useTheme, createTheme } from "@mui/material";
 
 interface ConfiguracionRutinaProps {
   diasRutina: number;
@@ -8,8 +8,18 @@ interface ConfiguracionRutinaProps {
   setEjerciciosPorDia: (ejercicios: number) => void;
 }
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#FF6B35", // Color anaranjado principal
+      light: "#FF9F1C", // Tono más claro
+      dark: "#FF4D00", // Tono más oscuro
+    },
+  },
+});
+
 export default function ConfiguracionRutina({ diasRutina, ejerciciosPorDia, setDiasRutina, setEjerciciosPorDia }: ConfiguracionRutinaProps) {
-  const theme = useTheme();
+  const currentTheme = useTheme();
 
   return (
     <Box>
