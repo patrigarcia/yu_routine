@@ -65,4 +65,6 @@ const RutinaSchema = new mongoose.Schema<IRutina>({
 // Crear o recuperar el modelo
 const Rutina = mongoose.models.Rutina || mongoose.model<IRutina>('Rutina', RutinaSchema);
 
+console.log('Modelo de Rutina creado o recuperado');
+
 export default Rutina;

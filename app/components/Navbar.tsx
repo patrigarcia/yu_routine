@@ -5,9 +5,16 @@ import { AppBar, Toolbar, Button, Box, Container, Typography } from "@mui/materi
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/store/authStore"; // Importar store
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const { isLoggedIn } = useAuthStore(); // Usar store
+  const { isLoggedIn, logout } = useAuthStore(); // Usar store y agregar logout
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout(); // Llamar a la función de logout del store
+    router.push('/'); // Redirigir al home después de cerrar sesión
+  };
 
   return (
     <AppBar
@@ -17,7 +24,6 @@ export default function Navbar() {
       sx={{
         backgroundColor: "transparent",
         boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
-        // Sombra de cajaxl",
       }}
     >
       <Container maxWidth="lg">
@@ -80,6 +86,24 @@ export default function Navbar() {
                   Ingresar
                 </Button>
               </Link>
+            )}
+            {isLoggedIn && (
+              <Button
+                color="primary"
+                onClick={handleLogout}
+                sx={{
+                  my: 2,
+                  mx: 1,
+                  fontSize: "1.1em",
+                  color: "#333",
+                  "&:hover": {
+                    color: "#FF1493", // Color fucsia
+                    backgroundColor: "transparent",
+                  },
+                }}
+              >
+                Cerrar sesión
+              </Button>
             )}
           </Box>
         </Toolbar>

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Rutina from './models/Rutina';
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -23,7 +24,17 @@ async function connectDB() {
       dbName: 'yu-routine' 
     };
 
-    cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGO_URI, opts).then(async (mongoose) => {
+      try {
+        // Obtener códigos de alumno para depuración
+        const rutinas = await Rutina.find({}, 'codigoAlumno nombreAlumno');
+        console.log('Códigos de alumno en la base de datos:');
+        rutinas.forEach(rutina => {
+          console.log(`Código: ${rutina.codigoAlumno}, Nombre: ${rutina.nombreAlumno}`);
+        });
+      } catch (error) {
+        console.error('Error al obtener códigos de alumno:', error);
+      }
       return mongoose;
     });
   }

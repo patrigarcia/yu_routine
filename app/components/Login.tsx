@@ -12,7 +12,6 @@ import {
   Alert,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useAuthStore } from "@/lib/store/authStore"; // Importar store
 import { createTheme, ThemeProvider } from "@mui/material";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
@@ -77,24 +76,63 @@ export default function Login() {
   const router = useRouter();
   const { login } = useAuthStore();
 
-  const handleLogin = () => {
-    // Código para entrenador hardcodeado
-    if (userType === "entrenador" && code.toLowerCase() === "yuli25") {
-      login("entrenador");
-      router.push("/entrenador");
-    }
-    // Código para alumno (6 dígitos)
-    else if (userType === "alumno" && /^\d{6}$/.test(code)) {
-      login("alumno");
-      router.push("/alumno");
-    } else {
-      setError("Código inválido. Intenta de nuevo.");
-      setCode(""); // Limpiar el input cuando el código es inválido
+  const handleLogin = async () => {
+    // Limpiar errores previos
+    setError("");
 
-      // Limpiar el error después de 4 segundos
-      setTimeout(() => {
-        setError("");
-      }, 4000);
+    // Validaciones iniciales
+    if (!code) {
+      setError("Por favor, ingresa un código");
+      return;
+    }
+
+    // Validación de formato según tipo de usuario
+    const isValidCode = userType === "entrenador" 
+      ? code.toLowerCase() === "yuli25"
+      : /^[A-Z]{4}\d{2}$/i.test(code);  // Formato: 4 letras mayúsculas + 2 dígitos
+
+    if (!isValidCode) {
+      setError(`Código de ${userType} inválido`);
+      return;
+    }
+
+    try {
+      // Login de entrenador
+      if (userType === "entrenador" && code.toLowerCase() === "yuli25") {
+        login("entrenador");
+        router.push("/entrenador");
+        return;
+      }
+
+      // Login de alumno
+      const response = await fetch('/api/alumno/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          codigo: code.toUpperCase(), // Convertir a mayúsculas
+          userType 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Guardar código de alumno en cookie
+        document.cookie = `codigoAlumno=${code.toUpperCase()}; path=/; max-age=3600`;
+        login("alumno");
+        router.push("/alumno");
+      } else {
+        // Manejar diferentes tipos de errores
+        const errorMessage = data.message || "Código de alumno inválido";
+        setError(errorMessage);
+        setCode(""); // Limpiar el input
+      }
+    } catch (error) {
+      console.error('Error en login:', error);
+      setError("Error de conexión. Intenta de nuevo.");
+      setCode(""); // Limpiar el input
     }
   };
 
@@ -122,16 +160,19 @@ export default function Login() {
             width: "100%",
           }}
         >
-          <Image
+          <img
             src="/yu.png"
             alt="Yu Routine Logo"
             width={150}
             height={150}
+            loading="lazy"
             style={{
               marginBottom: "32px",
               objectFit: "contain",
               width: "auto",
               height: "auto",
+              maxWidth: "150px",
+              maxHeight: "150px"
             }}
           />
 
