@@ -1,10 +1,21 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { Box, Typography, Avatar, Button, TextField, IconButton, useTheme } from "@mui/material";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Avatar,
+  Button,
+  TextField,
+  IconButton,
+  useTheme,
+  Grid,
+  InputAdornment,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import ViewListIcon from "@mui/icons-material/ViewList";
+import SearchIcon from "@mui/icons-material/Search";
 import { useRouter } from "next/navigation";
 
 import { useRutinaStore } from "@/store/rutinaStore";
@@ -16,11 +27,27 @@ import { Rutina, Alumno } from "@/types";
 export default function Entrenador() {
   const theme = useTheme();
   const router = useRouter();
-  const { rutinas, searchTerm, setSearchTerm, searchRutinas, isSearchFiltered, resetRutinas } = useRutinaStore();
+  const {
+    rutinas,
+    searchTerm,
+    setSearchTerm,
+    searchRutinas,
+    isSearchFiltered,
+    resetRutinas,
+    loading,
+    error,
+    fetchRutinas,
+    deleteRutina,
+    updateRutina,
+  } = useRutinaStore();
 
   const [openCambiarPassword, setOpenCambiarPassword] = useState(false);
   const [selectedAlumno, setSelectedAlumno] = useState<Alumno | null>(null);
   const [openAlumnoModal, setOpenAlumnoModal] = useState(false);
+
+  useEffect(() => {
+    fetchRutinas();
+  }, [fetchRutinas]);
 
   const handleCambiarPassword = async (currentPassword: string, newPassword: string) => {
     try {
@@ -30,7 +57,7 @@ export default function Entrenador() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          codigoAcceso: "yuli25", // Código de acceso hardcodeado por ahora
+          codigoAcceso: "yuli25",
           nuevaContrasena: newPassword,
         }),
       });
@@ -53,106 +80,149 @@ export default function Entrenador() {
     router.push("/crear-rutina");
   };
 
-  const handleEditarRutina = useCallback(() => {
-    // Lógica para editar rutina
-  }, []);
+  const handleSaveRutina = async (rutina: Rutina) => {
+    try {
+      await updateRutina(rutina);
+      await fetchRutinas();
+    } catch (error) {
+      console.error("Error al actualizar la rutina:", error);
+      alert("Error al actualizar la rutina");
+    }
+  };
 
   const handleSelectAlumno = (alumno: Alumno) => {
     setSelectedAlumno(alumno);
     setOpenAlumnoModal(true);
   };
 
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+
+    if (value.trim() === "") {
+      resetRutinas();
+    } else {
+      searchRutinas(value);
+    }
+  };
+
+  const handleDeleteRutina = async (id: string) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar esta rutina?")) {
+      try {
+        await deleteRutina(id);
+        await fetchRutinas();
+      } catch (error) {
+        console.error("Error al eliminar la rutina:", error);
+        alert("Error al eliminar la rutina");
+      }
+    }
+  };
+
   return (
-    <Box sx={{ p: 4 }}>
+    <Box
+      sx={{
+        p: { xs: 2, sm: 4 },
+        maxWidth: "1400px",
+        mx: "auto",
+        px: { xs: 2, sm: 4, md: 6, lg: 8 },
+      }}
+    >
+      {/* Perfil del Entrenador */}
       <Box
         sx={{
           display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          alignItems: { xs: "center", sm: "center" },
-          justifyContent: "space-between",
+          flexDirection: "column",
+          gap: 2,
           mb: 4,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", mb: { xs: 2, sm: 0 } }}>
-          <Avatar
-            alt="Yuliana Fanaro"
-            src="/perfil.jpg"
-            sx={{
-              width: { xs: 100, sm: 120, md: 150 },
-              height: { xs: 100, sm: 120, md: 150 },
-              mr: { xs: 0, sm: 3 },
-              mb: { xs: 2, sm: 0 },
-              border: `3px solid ${theme.palette.secondary.main}`,
-            }}
-          />
-          <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: "bold",
-                color: theme.palette.secondary.main,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 1,
-                justifyContent: { xs: "center", sm: "flex-start" },
-                fontSize: {
-                  xs: "1.5rem",
-                  sm: "2rem",
-                  md: "2.5rem",
-                },
-              }}
-            >
-              Yuliana Fanaro
-              <IconButton color="primary" size="small" sx={{ ml: 1 }} onClick={() => setOpenCambiarPassword(true)}>
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Typography>
-            <Typography variant="subtitle1">Profesora de Educación física | Personal Trainer</Typography>
-          </Box>
-        </Box>
-
+        {/* Línea superior: Avatar, textos y búsqueda */}
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            flexWrap: { xs: "wrap", md: "nowrap" },
             gap: 2,
-            width: { xs: "100%", sm: "auto" },
           }}
         >
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={handleCrearRutina}
-            sx={{
-              backgroundColor: theme.palette.primary.light,
-              color: "white",
-              width: { xs: "100%", sm: "auto" },
-              "&:hover": {
-                backgroundColor: theme.palette.primary.main,
-              },
-            }}
-          >
-            Crear rutina
-          </Button>
+          {/* Avatar y Nombre */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
               alignItems: "center",
+              gap: 2,
+              flex: { xs: "1 1 100%", md: "0 1 auto" },
+            }}
+          >
+            <Avatar
+              alt="Yuliana Fanaro"
+              src="/perfil.jpg"
+              sx={{
+                width: 80,
+                height: 80,
+                border: `4px solid ${theme.palette.secondary.main}`,
+              }}
+            />
+            <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: "bold",
+                    color: theme.palette.secondary.main,
+                    fontSize: { xs: "1.1em", md: "1.2em" },
+                  }}
+                >
+                  Yuliana Fanaro
+                </Typography>
+                <IconButton color="primary" size="small" onClick={() => setOpenCambiarPassword(true)}>
+                  <EditIcon />
+                </IconButton>
+              </Box>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: { xs: "0.9rem", md: "1rem" },
+                }}
+              >
+                Profesora de Educación física | Personal Trainer
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Componente de búsqueda */}
+          <Box
+            sx={{
+              display: "flex",
               gap: 1,
-              width: { xs: "100%", sm: "auto" },
+              flex: { xs: "1 1 100%", md: "0 1 auto" },
             }}
           >
             <TextField
               variant="outlined"
               size="small"
-              placeholder="Buscar alumno"
+              placeholder="Buscar alumno por nombre"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearch}
               sx={{
-                width: { xs: "100%", sm: "auto" },
-                flexGrow: { xs: 1, sm: 0 },
+                flex: 1,
+                minWidth: { xs: "auto", sm: "280px" },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: "text.secondary" }} />
+                  </InputAdornment>
+                ),
               }}
             />
             <Button
@@ -160,8 +230,7 @@ export default function Entrenador() {
               color="secondary"
               onClick={() => searchRutinas(searchTerm)}
               sx={{
-                width: { xs: "100%", sm: "auto" },
-                mt: { xs: 1, sm: 0 },
+                whiteSpace: "nowrap",
               }}
             >
               Buscar
@@ -173,30 +242,95 @@ export default function Entrenador() {
                 size="small"
                 onClick={resetRutinas}
                 startIcon={<ViewListIcon />}
-                sx={{
-                  width: { xs: "100%", sm: "auto" },
-                  mt: { xs: 1, sm: 0 },
-                }}
               >
-                Ver todas las rutinas
+                Ver todas
               </Button>
             )}
           </Box>
         </Box>
+
+        {/* Línea inferior: Botón crear rutina */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleCrearRutina}
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              color: "white",
+              "&:hover": {
+                backgroundColor: theme.palette.primary.dark,
+              },
+              whiteSpace: "nowrap",
+            }}
+          >
+            Crear nueva rutina
+          </Button>
+        </Box>
       </Box>
 
+      {/* Grid de Rutinas */}
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 3,
+            fontWeight: "bold",
+            color: theme.palette.primary.main,
+          }}
+        >
           Mis rutinas creadas
         </Typography>
-        {rutinas.map((rutina: Rutina) => (
-          <AlumnoCard key={rutina.codigoAlumno} alumno={rutina} onEditarRutina={() => handleEditarRutina()} />
-        ))}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 3,
+          }}
+        >
+          {loading ? (
+            <Typography>Cargando rutinas...</Typography>
+          ) : error ? (
+            <Typography color="error">{error}</Typography>
+          ) : rutinas.length === 0 ? (
+            <Typography>No hay rutinas disponibles</Typography>
+          ) : (
+            rutinas.map((rutina) => (
+              <AlumnoCard
+                key={rutina._id}
+                alumno={rutina}
+                onDelete={handleDeleteRutina}
+                onSave={handleSaveRutina}
+              />
+            ))
+          )}
+        </Box>
       </Box>
 
-      <PasswordModal open={openCambiarPassword} onClose={() => setOpenCambiarPassword(false)} onChangePassword={handleCambiarPassword} />
+      <PasswordModal
+        open={openCambiarPassword}
+        onClose={() => setOpenCambiarPassword(false)}
+        onChangePassword={handleCambiarPassword}
+      />
 
-      {selectedAlumno && <AlumnoModal open={openAlumnoModal} onClose={() => setOpenAlumnoModal(false)} alumno={selectedAlumno} onEditRutina={handleEditarRutina} />}
+      {selectedAlumno && (
+        <AlumnoModal
+          open={openAlumnoModal}
+          onClose={() => setOpenAlumnoModal(false)}
+          alumno={selectedAlumno}
+          onEditRutina={handleSaveRutina}
+        />
+      )}
     </Box>
   );
 }

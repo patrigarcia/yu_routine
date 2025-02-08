@@ -5,25 +5,25 @@ export interface Ejercicio {
   repeticiones: string;
   kilos: string;
   descanso: string;
-  video?: string | null;
+  video: string;
 }
 
 export interface Rutina {
+  _id: string;
   nombreAlumno: string;
   codigoAlumno: string;
+  dias: number;
+  ejerciciosPorDia: number;
+  ejercicios: Array<Array<{ [key: string]: Ejercicio }>>;
   fechaCreacion: string;
-  ejercicios: Ejercicio[][];
+  entrenadorId: string;
 }
 
 export interface Alumno {
-  id: string;
+  _id: string;
   nombreAlumno: string;
   codigoAlumno: string;
-  diasRutina: number;
-  ejerciciosPorDia: number;
-  ejercicios: Ejercicio[][];
-  fechaCreacion: string;
-  entrenadorId: string;
+  ejercicios?: Array<Array<{ [key: string]: Ejercicio }>>;
 }
 
 export interface ApiResponse<T> {

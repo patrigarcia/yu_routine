@@ -19,6 +19,8 @@ interface RutinaActions {
   setSelectedRutina: (rutina: Rutina | null) => void;
   setSelectedAlumno: (alumno: Alumno | null) => void;
   setSearchTerm: (term: string) => void;
+  updateRutina: (rutina: Rutina) => Promise<void>;
+  deleteRutina: (id: string) => Promise<void>;
 }
 
 export const useRutinaStore = create<RutinaState & RutinaActions>()(
@@ -49,67 +51,109 @@ export const useRutinaStore = create<RutinaState & RutinaActions>()(
             set({ 
               error: data.message || "Error al cargar rutinas", 
               loading: false,
-              rutinas: []
             });
           }
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : String(err);
+        } catch (error) {
           set({ 
-            error: errorMessage || "No se pudieron cargar las rutinas", 
-            loading: false,
-            rutinas: []
+            error: "Error al cargar rutinas", 
+            loading: false 
           });
         }
       },
 
-      searchRutinas: async (term: string) => {
+      searchRutinas: async (term) => {
         set({ loading: true, error: null, searchTerm: term });
         try {
-          const response = await fetch(`/api/rutinas?search=${encodeURIComponent(term)}`);
+          const response = await fetch(`/api/rutinas/search?term=${encodeURIComponent(term)}`);
           const data = await response.json();
 
           if (data.status === "success" && Array.isArray(data.rutinas)) {
             set({ 
               rutinas: data.rutinas, 
-              isSearchFiltered: true,
               loading: false,
+              isSearchFiltered: true,
               error: null
             });
           } else {
             set({ 
               error: data.message || "Error al buscar rutinas", 
-              loading: false,
-              rutinas: []
+              loading: false 
             });
           }
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : String(err);
+        } catch (error) {
           set({ 
-            error: errorMessage || "No se pudieron buscar las rutinas", 
-            loading: false,
-            rutinas: []
+            error: "Error al buscar rutinas", 
+            loading: false 
           });
         }
       },
 
       resetRutinas: () => {
-        get().fetchRutinas();
-        set({ 
-          searchTerm: '', 
-          isSearchFiltered: false 
-        });
+        const { fetchRutinas } = get();
+        set({ searchTerm: '', isSearchFiltered: false });
+        fetchRutinas();
       },
 
-      setSelectedRutina: (rutina) => {
-        set({ selectedRutina: rutina });
+      setSelectedRutina: (rutina) => set({ selectedRutina: rutina }),
+
+      setSelectedAlumno: (alumno) => set({ selectedAlumno: alumno }),
+
+      setSearchTerm: (term) => set({ searchTerm: term }),
+
+      updateRutina: async (rutina) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await fetch(`/api/rutinas/${rutina._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(rutina),
+          });
+
+          const data = await response.json();
+
+          if (data.status === "success") {
+            const { fetchRutinas } = get();
+            await fetchRutinas();
+          } else {
+            set({ 
+              error: data.message || "Error al actualizar la rutina", 
+              loading: false 
+            });
+          }
+        } catch (error) {
+          set({ 
+            error: "Error al actualizar la rutina", 
+            loading: false 
+          });
+        }
       },
 
-      setSelectedAlumno: (alumno) => {
-        set({ selectedAlumno: alumno });
-      },
+      deleteRutina: async (id) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await fetch(`/api/rutinas/${id}`, {
+            method: 'DELETE',
+          });
 
-      setSearchTerm: (term) => {
-        set({ searchTerm: term });
+          const data = await response.json();
+
+          if (data.status === "success") {
+            const { fetchRutinas } = get();
+            await fetchRutinas();
+          } else {
+            set({ 
+              error: data.message || "Error al eliminar la rutina", 
+              loading: false 
+            });
+          }
+        } catch (error) {
+          set({ 
+            error: "Error al eliminar la rutina", 
+            loading: false 
+          });
+        }
       },
     }),
     { name: 'RutinaStore' }

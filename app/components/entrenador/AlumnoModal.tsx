@@ -17,7 +17,7 @@ interface AlumnoModalProps {
   onClose: () => void;
   alumno: Alumno;
   rutina?: Rutina;
-  onEditRutina?: () => void;
+  onEditRutina: (rutina: Rutina) => Promise<void>;
 }
 
 export const AlumnoModal: React.FC<AlumnoModalProps> = ({ 
@@ -53,9 +53,14 @@ export const AlumnoModal: React.FC<AlumnoModalProps> = ({
           <Typography variant="h5" color="primary">
             Detalles de rutina
           </Typography>
-          <IconButton color="primary" onClick={onEditRutina}>
-            <EditIcon />
-          </IconButton>
+          {rutina && (
+            <IconButton 
+              color="primary" 
+              onClick={() => onEditRutina(rutina)}
+            >
+              <EditIcon />
+            </IconButton>
+          )}
         </Box>
 
         <Box sx={{ mb: 3 }}>
@@ -86,7 +91,7 @@ export const AlumnoModal: React.FC<AlumnoModalProps> = ({
         <Typography variant="h6" sx={{ mb: 2 }}>
           Ejercicios de la rutina
         </Typography>
-        <RutinaTable ejercicios={alumno.ejercicios || []} />
+        {rutina && <RutinaTable ejercicios={alumno.ejercicios || []} />}
       </Box>
     </Modal>
   );
